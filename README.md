@@ -122,13 +122,3 @@ The API will be available at `http://localhost:3000` by default.
 - **Admin-only routes** are protected and require the user to have `isAdmin: true`.
 
 ---
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request. For major changes, open an issue first to discuss your ideas.
-
----
-
-## License
-
-This project is licensed under the MIT License.
