@@ -1,0 +1,297 @@
+# Hotel Management System API Documentation
+
+## Overview
+
+The Hotel Management System API is a comprehensive and secure RESTful backend designed to streamline and automate hotel operations. It provides endpoints for user registration and authentication, robust room management, seamless booking workflows, and payment simulation. The API is built with scalability and security in mind, leveraging modern technologies such as Node.js, Express, and MongoDB. It is suitable for integration with web or mobile frontends, and supports both regular users and administrators with role-based access control. All sensitive operations are protected, and the system ensures data integrity and privacy at every step.
+
+---
+
+## Features
+
+- **User Registration & Authentication**:
+ Allows users to securely register and log in. Authentication is handled using JWT tokens, ensuring that only authorized users can access protected resources. Passwords are never stored in plain text and are securely hashed using bcrypt.
+- **Role-based Authorization**: Differentiates between regular users and administrators. Only users with admin privileges can perform sensitive operations such as adding, updating, or deleting rooms, ensuring operational security and integrity.
+- **Room Management**: Provides full CRUD (Create, Read, Update, Delete) capabilities for hotel rooms. Admins can manage room inventory, set pricing, and update availability, while regular users can view available rooms.
+- **Booking Management**: Enables users to book rooms for specific dates, with built-in validation to prevent double-booking and ensure valid date ranges. Users can also view their booking history.
+- **Payment Simulation**: Simulates payment processing for bookings. Handles both successful and failed payments, updating booking and room statuses accordingly to reflect real-world payment scenarios.
+- **Sensitive Data Handling**: All sensitive configuration, such as database URIs and JWT secrets, are managed via environment variables in a `.env` file. This prevents accidental exposure of credentials and secrets in source code.
+- **Input Validation**: Every endpoint validates incoming data for required fields, correct types, and valid formats, reducing the risk of invalid or malicious data entering the system.
+- **Cookie-based Session**: JWT tokens are stored in HTTP-only cookies, protecting them from client-side JavaScript access and reducing the risk of XSS attacks.
+- **Password Security**: User passwords are hashed using bcrypt before being stored in the database, ensuring that even if the database is compromised, raw passwords are not exposed.
+- **Error Handling**: Implements a centralized error handler that provides consistent and informative error responses across all endpoints, improving developer experience and debugging.
+
+---
+
+## Security & Best Practices
+
+- **JWT Authentication**: All protected routes require a valid JWT token, which is issued upon successful login and stored in an HTTP-only cookie. This approach ensures that only authenticated users can access sensitive endpoints, and the use of HTTP-only cookies helps prevent token theft via XSS attacks.
+- **Password Hashing**: User passwords are never stored or transmitted in plain text. Instead, bcrypt is used to hash passwords before saving them to the database, providing strong protection against brute-force and rainbow table attacks.
+- **Environment Variables**: All sensitive configuration data, such as database connection strings and JWT secrets, are stored in a `.env` file and loaded at runtime. This keeps secrets out of the codebase and version control, reducing the risk of accidental leaks.
+- **Role-based Access Control**: The API enforces strict authorization checks, allowing only users with `isAdmin: true` to perform administrative actions like adding, updating, or deleting rooms. This minimizes the risk of unauthorized changes to critical data.
+- **Input Validation**: Both at the controller and schema/model level, all incoming data is validated for type, format, and required fields. This prevents malformed or malicious data from causing errors or security vulnerabilities.
+- **Error Handling**: All errors are caught and handled in a centralized manner, ensuring that clients receive clear, consistent, and non-revealing error messages. This also helps prevent information leakage about the internal workings of the API.
+- **Session Security**: By using HTTP-only cookies for JWT storage, the API reduces the risk of client-side script access to tokens, enhancing session security.
+- **Data Integrity**: The system automatically manages room availability and booking status based on user actions and payment outcomes, ensuring that the data always reflects the real-world state of the hotel.
+- **No Sensitive Data Exposure**: The API never exposes sensitive information such as passwords, JWT secrets, or internal error details in API responses or logs.
+
+---
+
+## API Endpoints & Specifications
+
+### Authentication
+
+#### Register
+
+- **Route:** `POST http://localhost:5000/api/auth/register`
+- **Description:** Register a new user.
+- **Request Body:**
+    ```json
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "password123",
+      "isAdmin": false
+    }
+    ```
+- **Response:**
+    ```json
+    {
+      "message": "User registered successfully",
+      "newUser": {
+        "_id": "...",
+        "name": "John Doe",
+        "email": "john@example.com",
+        "isAdmin": false,
+        // ...timestamps
+      }
+    }
+    ```
+
+#### Login
+
+- **Route:** `POST http://localhost:5000/api/auth/login`
+- **Description:** Login and receive a JWT token in an HTTP-only cookie.
+- **Request Body:**
+    ```json
+    {
+      "email": "john@example.com",
+      "password": "password123"
+    }
+    ```
+- **Response:**
+    ```json
+    {
+      "message": "Login successful"
+    }
+    ```
+
+#### Logout
+
+- **Route:** `POST http://localhost:5000/api/auth/logout`
+- **Description:** Logout and clear the JWT cookie.
+- **Response:**
+    ```json
+    {
+      "message": "Logout successful"
+    }
+    ```
+
+---
+
+### Room Management
+
+> **Note:** All room management routes require authentication. Only admins can add, update, or delete rooms.
+
+#### Get All Available Rooms
+
+- **Route:** `GET http://localhost:5000/api/rooms/rooms`
+- **Description:** Retrieve all available rooms.
+- **Headers:** `Cookie: token=<JWT>`
+- **Response:**
+    ```json
+    [
+      {
+        "_id": "...",
+        "number": "101",
+        "type": "Deluxe",
+        "price": 1500,
+        "isAvailable": true
+      }
+      // ...
+    ]
+    ```
+
+#### Add Room (Admin Only)
+
+- **Route:** `POST http://localhost:5000/api/rooms/rooms`
+- **Description:** Add a new room.
+- **Headers:** `Cookie: token=<JWT>`
+- **Request Body:**
+    ```json
+    {
+      "number": "102",
+      "type": "Suite",
+      "price": 2500
+    }
+    ```
+- **Response:**
+    ```json
+    {
+      "_id": "...",
+      "number": "102",
+      "type": "Suite",
+      "price": 2500,
+      "isAvailable": true
+    }
+    ```
+
+#### Update Room (Admin Only)
+
+- **Route:** `PUT http://localhost:5000/api/rooms/rooms/:id`
+- **Description:** Update room details.
+- **Headers:** `Cookie: token=<JWT>`
+- **Request Body:**
+    ```json
+    {
+      "price": 1800
+    }
+    ```
+- **Response:** Updated room object.
+
+#### Delete Room (Admin Only)
+
+- **Route:** `DELETE http://localhost:5000/api/rooms/rooms/:id`
+- **Description:** Delete a room.
+- **Headers:** `Cookie: token=<JWT>`
+- **Response:** HTTP 204 No Content.
+
+---
+
+### Booking Management
+
+> **Note:** All booking routes require authentication.
+
+#### Book a Room
+
+- **Route:** `POST http://localhost:5000/api/bookings/book`
+- **Description:** Book a room for specific dates.
+- **Headers:** `Cookie: token=<JWT>`
+- **Request Body:**
+    ```json
+    {
+      "roomId": "<room_id>",
+      "checkIn": "2024-07-01",
+      "checkOut": "2024-07-03"
+    }
+    ```
+- **Response:**
+    ```json
+    {
+      "message": "Booking successful",
+      "booking": {
+        "_id": "...",
+        "userId": "...",
+        "roomId": "...",
+        "checkIn": "2024-07-01T00:00:00.000Z",
+        "checkOut": "2024-07-03T00:00:00.000Z",
+        "status": "confirmed"
+      }
+    }
+    ```
+
+#### Get My Bookings
+
+- **Route:** `GET http://localhost:5000/api/bookings/my-bookings`
+- **Description:** Retrieve all bookings for the authenticated user.
+- **Headers:** `Cookie: token=<JWT>`
+- **Response:** Array of booking objects.
+
+---
+
+### Payment Simulation
+
+> **Note:** All payment routes require authentication.
+
+#### Simulate Payment
+
+- **Route:** `POST http://localhost:5000/api/payments/pay`
+- **Description:** Simulate a payment for a booking.
+- **Headers:** `Cookie: token=<JWT>`
+- **Request Body:**
+    ```json
+    {
+      "cardNumber": "4111111111111111",
+      "expiryDate": "12/26",
+      "cvv": "123",
+      "amount": 3000,
+      "bookingId": "<booking_id>"
+    }
+    ```
+- **Response (Success):**
+    ```json
+    {
+      "message": "Payment successful",
+      "payment": {
+        "_id": "...",
+        "userId": "...",
+        "bookingId": "...",
+        "amount": 3000,
+        "status": "completed"
+      }
+    }
+    ```
+- **Response (Failure):**
+    ```json
+    {
+      "message": "Payment failed",
+      "error": "Invalid card information"
+    }
+    ```
+
+---
+
+## Data Validation
+
+- **User Registration/Login:** Valid email, password (min 6 chars), name required.
+- **Room:** Unique number, type, positive price.
+- **Booking:** Dates must be today or future, check-out at least 1 day after check-in.
+- **Payment:** Card info required, amount positive.
+
+---
+
+## Special Features
+
+- **Security:** JWT tokens, bcrypt password hashing, HTTP-only cookies, .env for secrets.
+- **Authorization:** Role-based (admin/user) for sensitive operations.
+- **Sensitive Data:** Never exposed in logs or responses.
+- **Error Handling:** Consistent error responses for all endpoints.
+- **Room Availability:** Automatically managed on booking/payment status.
+- **Booking Status:** Automatically updated on payment success/failure.
+
+---
+
+## Example .env
+
+```
+MONGODB_URI=mongodb://localhost:27017/hotel-management
+JWT_SECRET=your_jwt_secret
+NODE_ENV=development
+PORT=5000
+```
+
+---
+
+## Testing
+
+You can use [Postman](https://www.postman.com/) or [curl](https://curl.se/) to test the endpoints. Use the sample requests above and ensure you include the JWT token in the `Cookie` header for protected routes.
+
+---
+
+## Contact & Contribution
+
+- **Contributions:** Fork and submit a pull request.
+- **Issues:** Open an issue for bugs or feature requests.
+
+---
+
+**End of Documentation**
