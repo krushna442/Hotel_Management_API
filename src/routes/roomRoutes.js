@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const roomController = require('../controllers/roomController');
-const authMiddleware = require('../middlewares/authMiddleware'); // JWT auth middleware
+const authMiddleware = require('../middlewares/authMiddleware');
 
 // GET /rooms - List all available rooms (requires authentication)
 router.get('/rooms', authMiddleware, roomController.getAllRooms);

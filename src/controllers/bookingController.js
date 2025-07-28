@@ -2,12 +2,10 @@ const Booking = require('../models/booking');
 const User = require('../models/user');
 const Room = require('../models/room');
 
-// Book a room
 exports.bookRoom = async (req, res) => {
     const { roomId, checkIn, checkOut } = req.body;
     const userId = req.userId;
 
-    // Validate dates
     const now = new Date();
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
@@ -51,7 +49,6 @@ exports.bookRoom = async (req, res) => {
     }
 };
 
-// Get my bookings
 exports.getMyBookings = async (req, res) => {
     const userId = req.userId;
 

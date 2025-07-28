@@ -6,13 +6,11 @@ const { simulatePayment } = require('../utils/paymentSimulator');
 exports.simulatePayment = async (req, res) => {
     const { cardNumber, expiryDate, cvv, amount ,bookingId } = req.body;
 
-    // Simulate payment processing
     const paymentResult = simulatePayment({cardNumber, expiryDate, cvv, amount});
 
     if (paymentResult.success) {
-        // Save payment details to the database
         const payment = new Payment({
-            userId: req.userId, // Assuming user ID is available in req.user
+            userId: req.userId, 
             bookingId: bookingId,
             amount: amount,
             status: 'completed'

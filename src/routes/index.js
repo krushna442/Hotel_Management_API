@@ -5,7 +5,10 @@ const authRoutes = require('./authRoutes');
 const roomRoutes = require('./roomRoutes');
 const bookingRoutes = require('./bookingRoutes');
 const paymentRoutes = require('./paymentRoutes');
-const authMiddleware = require('../middlewares/authMiddleware'); // JWT auth middleware
+const authMiddleware = require('../middlewares/authMiddleware'); 
+
+
+
 router.use('/auth', authRoutes);
 router.use('/rooms', roomRoutes);
 router.use('/bookings', authMiddleware, bookingRoutes);

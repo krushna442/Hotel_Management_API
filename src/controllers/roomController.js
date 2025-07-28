@@ -14,7 +14,6 @@ exports.addRoom = async (req, res) => {
     try {
         const userId = req.userId;
         const user = await User.findById(userId);
-        // Only allow if user exists and isAdmin is true
         if (!user || !user.isAdmin) {
             return res.status(403).json({ message: 'Not allowed' });
         }
