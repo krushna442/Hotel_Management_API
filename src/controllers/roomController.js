@@ -28,9 +28,12 @@ exports.addRoom = async (req, res) => {
 
 exports.updateRoom = async (req, res) => {
     try {
-        const userId = req.cookies.userId;
+        console.log('updateRoom: req.userId:', req.userId);
+        const userId = req.userId;
         const user = await User.findById(userId);
+        console.log('updateRoom: user:', user);
         if (!user || !user.isAdmin) {
+            console.log('updateRoom: Not allowed - user not found or not admin');
             return res.status(403).json({ message: 'Not allowed' });
         }
         const { id } = req.params;
@@ -44,9 +47,12 @@ exports.updateRoom = async (req, res) => {
 
 exports.deleteRoom = async (req, res) => {
     try {
-        const userId = req.cookies.userId;
+        console.log('deleteRoom: req.userId:', req.userId);
+        const userId = req.userId; 
         const user = await User.findById(userId);
+        console.log('deleteRoom: user:', user);
         if (!user || !user.isAdmin) {
+            console.log('deleteRoom: Not allowed - user not found or not admin');
             return res.status(403).json({ message: 'Not allowed' });
         }
         const { id } = req.params;
