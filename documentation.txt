@@ -179,9 +179,9 @@ The Hotel Management System API is a comprehensive and secure RESTful backend de
 - **Request Body:**
     ```json
     {
-      "roomId": "<room_id>",
-      "checkIn": "2024-07-01",
-      "checkOut": "2024-07-03"
+      "roomId": "<room_id>",   // _id of the room 
+      "checkIn": "2025-08-01",
+      "checkOut": "2025-08-03"
     }
     ```
 - **Response:**
@@ -240,6 +240,8 @@ The Hotel Management System API is a comprehensive and secure RESTful backend de
       }
     }
     ```
+    Now check my bookings again , payment details have added to booking   - **Route:** `GET http://localhost:5000/api/bookings/my-bookings` 
+
 - **Response (Failure):**
     ```json
     {
